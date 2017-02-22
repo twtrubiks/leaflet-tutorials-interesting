@@ -17,7 +17,7 @@
 clone 我的簡單範例
 
 ```
-git clone
+git clone https://github.com/twtrubiks/leaflet-tutorials-interesting
 ```
 
 接著請在  cmd (命令提示字元) 輸入以下指令
@@ -59,6 +59,10 @@ def api():
 
 ## 執行畫面
 
+```
+python app.py
+```
+
 首頁
 
 左上角可以全螢幕
@@ -85,7 +89,7 @@ def api():
 ## 執行環境
 * Python 3.4.3
 
-##  [leaflet](http://leafletjs.com/) [plugins](http://leafletjs.com/plugins.html) Reference
+## Reference
 * [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster)
 * [leaflet-locatecontrol](https://github.com/domoritz/leaflet-locatecontrol)
 * [leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen)
