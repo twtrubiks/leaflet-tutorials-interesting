@@ -3,8 +3,6 @@
 
 * [Youtube Demo](https://youtu.be/JVljuudfamM)
 
-
-
 ## Leaflet 與  Google Map 比較
 
 * [leaflet](http://leafletjs.com/) 在手機上表現的效能以及速度勝過 Google Map
@@ -12,22 +10,33 @@
 * [leaflet](http://leafletjs.com/) 有很多額外的 [plugins](http://leafletjs.com/plugins.html)
 
 ## 安裝套件
-確定電腦有安裝 [Python](https://www.python.org/) 之後
 
-clone 我的簡單範例
+clone 專案
 
 ```
 git clone https://github.com/twtrubiks/leaflet-tutorials-interesting
+cd leaflet-tutorials-interesting
 ```
 
-接著請在  cmd (命令提示字元) 輸入以下指令
+建立虛擬環境並安裝相依套件
+
 ```
 pip install -r requirements.txt
 ```
 
 ## 使用方法 以及 執行畫面
 
-先產生模擬資料
+第一次使用先初始化資料庫 (Flask-Migrate 4.x 已內建 `flask db` CLI,不再需要 Flask-Script)
+
+```
+export FLASK_APP=app.py        # Windows PowerShell: $env:FLASK_APP="app.py"
+flask db init
+flask db migrate -m "init"
+flask db upgrade
+```
+
+接著產生模擬資料
+
 ```
 python generator_data.py
 ```
@@ -37,31 +46,39 @@ python generator_data.py
 
 接著我們設計簡單的 api ， 其實就是去讀 app.db 的資料，接著在吐給前端而已。
 
-```
-@app.route("/api", methods=['POST'])
+```python
+@app.route("/api", methods=["POST"])
 def api():
-    db_data = MapPets.query.all()
-    infornation_dic = {}
-    infornation_list = []
-    for data in db_data:
-        infornation_dic['data'] = []
-        infornation_dic['Name'] = data.Name
-        infornation_dic['Picture'] = data.Picture
-        infornation_dic['Color'] = data.Color
-        infornation_dic['Longitude'] = data.Longitude
-        infornation_dic['Latitude'] = data.Latitude
-        infornation_list.append(infornation_dic)
-        infornation_dic = {}
-
-    return json.dumps(infornation_list)
+    pets = MapPets.query.all()
+    return jsonify([
+        {
+            "Name": p.Name,
+            "Picture": p.Picture,
+            "Color": p.Color,
+            "Longitude": p.Longitude,
+            "Latitude": p.Latitude,
+        }
+        for p in pets
+    ])
 ```
 
 
 ## 執行畫面
 
+只在本機跑 (預設綁 `127.0.0.1:5000`,只有自己連得到):
+
 ```
 python app.py
 ```
+
+想讓區網 / 外網其他裝置也連得進來,改用 Flask CLI 並指定 `--host=0.0.0.0`:
+
+```
+export FLASK_APP=app.py        # Windows PowerShell: $env:FLASK_APP="app.py"
+flask run --host=0.0.0.0 --port=5000 --debug
+```
+
+> 兩個都是 Werkzeug 開發 server,**不適合 production**。正式部署請改用 gunicorn / uWSGI 等 WSGI server (例如 `gunicorn -w 4 'app:app'`)。
 
 首頁
 
@@ -83,19 +100,21 @@ python app.py
 
 ![alt tag](http://i.imgur.com/tiwg6s7.jpg)
 
-
-
-
 ## 執行環境
-* Python 3.4.3
+
+* Python 3.13
+* Flask 3.1
+* Flask-SQLAlchemy 3.1 / SQLAlchemy 2.0
+* Flask-Migrate 4.1
+* Leaflet 1.9.4 + 相關 plugin 全部走 jsDelivr CDN
 
 ## Reference
+* [Leaflet](https://leafletjs.com/)
 * [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster)
 * [leaflet-locatecontrol](https://github.com/domoritz/leaflet-locatecontrol)
 * [leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen)
 * [leaflet-search](https://github.com/stefanocudini/leaflet-search)
 * [Leaflet.SmoothMarkerBouncing](https://github.com/hosuaby/Leaflet.SmoothMarkerBouncing)
-
 
 ## License
 MIT license

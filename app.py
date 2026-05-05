@@ -1,32 +1,41 @@
-from flask import *
-from dbModel import *
+from flask import Flask, jsonify, render_template
+from flask_migrate import Migrate
 
-app = Flask(__name__)
-
-
-@app.route("/index")
-@app.route("/")
-def index():
-    return render_template('index.html')
+from models import MapPets, db
 
 
-@app.route("/api", methods=['POST'])
-def api():
-    db_data = MapPets.query.all()
-    infornation_dic = {}
-    infornation_list = []
-    for data in db_data:
-        infornation_dic['data'] = []
-        infornation_dic['Name'] = data.Name
-        infornation_dic['Picture'] = data.Picture
-        infornation_dic['Color'] = data.Color
-        infornation_dic['Longitude'] = data.Longitude
-        infornation_dic['Latitude'] = data.Latitude
-        infornation_list.append(infornation_dic)
-        infornation_dic = {}
+def create_app():
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    return json.dumps(infornation_list)
+    db.init_app(app)
+    Migrate(app, db)
+
+    @app.route("/")
+    @app.route("/index")
+    def index():
+        return render_template("index.html")
+
+    @app.route("/api", methods=["POST"])
+    def api():
+        pets = MapPets.query.all()
+        return jsonify([
+            {
+                "Name": p.Name,
+                "Picture": p.Picture,
+                "Color": p.Color,
+                "Longitude": p.Longitude,
+                "Latitude": p.Latitude,
+            }
+            for p in pets
+        ])
+
+    return app
 
 
-if __name__ == '__main__':
+app = create_app()
+
+
+if __name__ == "__main__":
     app.run(debug=True)
